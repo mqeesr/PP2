@@ -17,3 +17,10 @@ print(a.split(",")) # returns ['Hello', ' World!']
 #5
 txt = "We are the so-called \"Vikings\" from the north."
 print(txt) 
+
+st = input()
+a = ""
+for i in st:
+  if i.isdigi():
+    a += i + " "
+print(a)
