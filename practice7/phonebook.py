@@ -7,7 +7,6 @@ DROP TABLE IF EXISTS contacts;
 CREATE TABLE contacts (
     id         SERIAL PRIMARY KEY,
     first_name VARCHAR(50)  NOT NULL,
-    last_name  VARCHAR(50)  NOT NULL DEFAULT '',
     phone      VARCHAR(20)  NOT NULL UNIQUE
 );
 """
@@ -22,19 +21,16 @@ def create_table():
 
 
 def insert_from_csv(filepath: str = "contacts.csv"):
-
     inserted = skipped = 0
     sql = """
-        INSERT INTO contacts (first_name, last_name, phone)
-        VALUES (%s, %s, %s)
+        INSERT INTO contacts (first_name, phone)
+        VALUES (%s, %s)
         ON CONFLICT (phone) DO NOTHING
     """
     try:
         with open(filepath, newline="", encoding="utf-8") as fh:
             reader = csv.DictReader(fh)
-            rows = [(r["first_name"].strip(),
-                     r.get("last_name", "").strip(),
-                     r["phone"].strip()) for r in reader]
+            rows = [(r["first_name"].strip(), r["phone"].strip()) for r in reader]
     except FileNotFoundError:
         print(f"file not found: {filepath}")
         return
@@ -55,7 +51,6 @@ def insert_from_csv(filepath: str = "contacts.csv"):
 def insert_from_console():
     print("\n─── add new contact ───")
     first_name = input("first name : ").strip()
-    last_name = input("last name  : ").strip()
     phone = input("phone      : ").strip()
 
     if not first_name or not phone:
@@ -63,15 +58,15 @@ def insert_from_console():
         return
 
     sql = """
-        INSERT INTO contacts (first_name, last_name, phone)
-        VALUES (%s, %s, %s)
+        INSERT INTO contacts (first_name, phone)
+        VALUES (%s, %s)
         ON CONFLICT (phone) DO NOTHING
     """
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(sql, (first_name, last_name, phone))
+            cur.execute(sql, (first_name, phone))
             if cur.rowcount:
-                print(f"contact '{first_name} {last_name}' added.")
+                print(f"contact '{first_name}' added.")
             else:
                 print(f"phone '{phone}' already exists - contact not added.")
         conn.commit()
@@ -114,16 +109,16 @@ def _print_contacts(rows):
     if not rows:
         print("(no contacts found)")
         return
-    print(f"\n  {'ID':<5} {'First Name':<15} {'Last Name':<15} {'Phone':<20}")
-    print("  " + "─" * 57)
+    print(f"\n  {'ID':<5} {'First Name':<15} {'Phone':<20}")
+    print("  " + "─" * 42)
     for row in rows:
-        print(f"  {row[0]:<5} {row[1]:<15} {row[2]:<15} {row[3]:<20}")
+        print(f"  {row[0]:<5} {row[1]:<15} {row[2]:<20}")
     print(f"\n  {len(rows)} record(s) found.")
 
 
 def query_contacts():
     print("\n─── search contacts ───")
-    print("1 - by name (first or last, partial match)")
+    print("1 - by name (partial match)")
     print("2 - by phone prefix")
     print("3 - show all")
     choice = input("choice: ").strip()
@@ -133,24 +128,24 @@ def query_contacts():
             if choice == "1":
                 name = input("name fragment: ").strip()
                 cur.execute("""
-                    SELECT id, first_name, last_name, phone
+                    SELECT id, first_name, phone
                     FROM contacts
-                    WHERE first_name ILIKE %s OR last_name ILIKE %s
+                    WHERE first_name ILIKE %s
                     ORDER BY id
-                """, (f"%{name}%", f"%{name}%"))
+                """, (f"%{name}%",))
 
             elif choice == "2":
                 prefix = input("phone prefix: ").strip()
                 cur.execute("""
-                    SELECT id, first_name, last_name, phone
+                    SELECT id, first_name, phone
                     FROM contacts
                     WHERE phone LIKE %s
-                    ORDER BY phone
+                    ORDER BY id
                 """, (f"{prefix}%",))
 
             elif choice == "3":
                 cur.execute("""
-                    SELECT id, first_name, last_name, phone
+                    SELECT id, first_name, phone
                     FROM contacts
                     ORDER BY id
                 """)
@@ -167,7 +162,7 @@ def query_contacts():
 def delete_contact():
     print("\n─── delete contact ───")
     print("1 - by phone number")
-    print("2 - by full name (first + last)")
+    print("2 - by name")
     choice = input("choice: ").strip()
 
     with get_connection() as conn:
@@ -182,15 +177,14 @@ def delete_contact():
 
             elif choice == "2":
                 first_name = input("first name: ").strip()
-                last_name  = input("last name : ").strip()
                 cur.execute("""
                     DELETE FROM contacts
-                    WHERE first_name ILIKE %s AND last_name ILIKE %s
-                """, (first_name, last_name))
+                    WHERE first_name ILIKE %s
+                """, (first_name,))
                 if cur.rowcount:
-                    print(f"{cur.rowcount} contact(s) named '{first_name} {last_name}' deleted")
+                    print(f"{cur.rowcount} contact(s) named '{first_name}' deleted")
                 else:
-                    print(f"no contact found with name '{first_name} {last_name}'")
+                    print(f"no contact found with name '{first_name}'")
 
             else:
                 print("invalid choice")
@@ -200,14 +194,15 @@ def delete_contact():
 
 
 menu = """
- ______________________________
-|  1 — Import from CSV         |
-|  2 — Add contact (console)   |
-|  3 — Update contact          |
-|  4 — Search / Query          |
-|  5 — Delete contact          |
-|  0 — Exit                    |
-|______________________________|
+
+ ══════════════════════════════
+║  1 — Import from CSV         ║
+║  2 — Add contact (console)   ║
+║  3 — Update contact          ║
+║  4 — Search / Query          ║
+║  5 — Delete contact          ║
+║  0 — Exit                    ║
+╚══════════════════════════════╝
 """
 
 actions = {
