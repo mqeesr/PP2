@@ -59,7 +59,7 @@ def insert_from_console():
     phone = input("phone      : ").strip()
 
     if not first_name or not phone:
-        print("[✗] First name and phone are required.")
+        print("first name and phone are required.")
         return
 
     sql = """
