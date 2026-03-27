@@ -194,15 +194,14 @@ def delete_contact():
 
 
 menu = """
-
- ══════════════════════════════
-║  1 — Import from CSV         ║
-║  2 — Add contact (console)   ║
-║  3 — Update contact          ║
-║  4 — Search / Query          ║
-║  5 — Delete contact          ║
-║  0 — Exit                    ║
-╚══════════════════════════════╝
+ ______________________________
+|  1 — Import from CSV         |
+|  2 — Add contact (console)   |
+|  3 — Update contact          |
+|  4 — Search / Query          |
+|  5 — Delete contact          |
+|  0 — Exit                    |
+|______________________________|
 """
 
 actions = {
