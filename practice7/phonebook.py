@@ -54,11 +54,11 @@ def clear_table():
     cur.close()
     conn.close()
 
-def insert_from_csv(filename="contacts.csv"):
+def insert_from_csv():
     conn = get_connection()
     cur = conn.cursor()
 
-    with open(filename, "r") as f:
+    with open("contacts.csv", "r") as f:
         reader = csv.reader(f)
 
         for row in reader:
