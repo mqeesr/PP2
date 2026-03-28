@@ -254,7 +254,7 @@ clear_table()
 
 
 while True:
-    print("\n===== PHONEBOOK =====")
+    print("\n--- PHONEBOOK ---")
     print("1 - Load from CSV")
     print("2 - Add contact")
     print("3 - Show all")
