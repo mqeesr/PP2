@@ -34,7 +34,7 @@ def search_by_pattern():
         for row in rows:
             print(row)
     else:
-        print("\nnothing found.")
+        print("\nnothing found")
 
     cur.close()
     conn.close()
@@ -177,4 +177,4 @@ while True:
         print("goodbye")
         break
     else:
-        print("invalid choice.")
+        print("invalid choice")
