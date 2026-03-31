@@ -1,147 +1,180 @@
-import csv
 from connect import get_connection
 
-def search_pattern():
-    pattern = input("Enter pattern: ")
+
+def load_sql_file(filename):
+    with open(filename, "r", encoding="utf-8") as f:
+        sql = f.read()
 
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute(
-        """SELECT * FROM contacts 
-           WHERE name ILIKE %s OR phone LIKE %s""",
-        (f"%{pattern}%", f"%{pattern}%")
-    )
-
-    rows = cur.fetchall()
-
-    if not rows:
-        print("Nothing found")
-    else:
-        for row in rows:
-            print(row)
+    cur.execute(sql)
+    conn.commit()
 
     cur.close()
     conn.close()
 
 
-def insert_or_update():
-    name = input("Enter name: ").strip()
-    phone = input("Enter phone: ").strip()
+def setup_database_objects():
+    load_sql_file("functions.sql")
+    load_sql_file("procedures.sql")
+
+
+def search_by_pattern():
+    pattern = input("enter pattern: ").strip()
 
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute("SELECT 1 FROM contacts WHERE name=%s", (name,))
+    cur.execute("SELECT * FROM search_contacts(%s)", (pattern,))
+    rows = cur.fetchall()
 
-    if cur.fetchone():
-        cur.execute(
-            "UPDATE contacts SET phone=%s WHERE name=%s",
-            (phone, name)
-        )
-        print("Updated existing contact")
+    if rows:
+        print("\nfound contacts:")
+        for row in rows:
+            print(row)
     else:
-        cur.execute(
-            "INSERT INTO contacts (name, phone) VALUES (%s, %s)",
-            (name, phone)
-        )
-        print("Inserted new contact")
+        print("\nnothing found.")
 
+    cur.close()
+    conn.close()
+
+
+def insert_or_update_one():
+    name = input("enter name: ").strip()
+    phone = input("enter phone: ").strip()
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("CALL insert_or_update_user(%s, %s)", (name, phone))
     conn.commit()
+
+    print("\ninsert/update done")
+
     cur.close()
     conn.close()
 
 
 def insert_many():
-    n = int(input("How many users: "))
+    n = int(input("how many contacts to enter "))
 
-    invalid = []
+    names = []
+    phones = []
+
+    for i in range(n):
+        print(f"\ncontact #{i + 1}")
+        name = input("enter name: ").strip()
+        phone = input("enter phone: ").strip()
+
+        names.append(name)
+        phones.append(phone)
 
     conn = get_connection()
     cur = conn.cursor()
 
-    for _ in range(n):
-        name = input("Name: ")
-        phone = input("Phone: ")
-
-        if not phone.isdigit():
-            invalid.append((name, phone))
-            continue
-
-        cur.execute(
-            "INSERT INTO contacts (name, phone) VALUES (%s, %s)",
-            (name, phone)
-        )
-
+    cur.execute("SELECT * FROM insert_many_users(%s, %s)", (names, phones))
+    bad_rows = cur.fetchall()
     conn.commit()
+
+    print("\nbulk insert/update finished")
+
+    if bad_rows:
+        print("\nincorrect data:")
+        for row in bad_rows:
+            print(row)
+    else:
+        print("all contacts were processed successfully")
+
     cur.close()
     conn.close()
 
-    print("Invalid data:", invalid)
 
-
-def get_paginated():
-    limit = int(input("Limit: "))
-    offset = int(input("Offset: "))
+def show_paginated():
+    limit_value = int(input("enter limit: "))
+    offset_value = int(input("enter offset: "))
 
     conn = get_connection()
     cur = conn.cursor()
 
     cur.execute(
-        "SELECT * FROM contacts ORDER BY id LIMIT %s OFFSET %s",
-        (limit, offset)
+        "SELECT * FROM get_contacts_paginated(%s, %s)",
+        (limit_value, offset_value)
     )
-
     rows = cur.fetchall()
 
-    if not rows:
-        print("No data")
-    else:
+    if rows:
+        print("\ncontacts:")
         for row in rows:
             print(row)
+    else:
+        print("\nno contacts for this page")
 
     cur.close()
     conn.close()
 
 
-def delete_by_value():
-    val = input("Enter name or phone: ")
+def delete_by_name_or_phone():
+    value = input("enter username or phone to delete: ").strip()
 
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute(
-        "DELETE FROM contacts WHERE name=%s OR phone=%s",
-        (val, val)
-    )
-
+    cur.execute("CALL delete_user(%s)", (value,))
     conn.commit()
+
+    print("\ndeleted")
+
     cur.close()
     conn.close()
 
-    print("Deleted if existed")
 
+def show_all_contacts():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM contacts ORDER BY id")
+    rows = cur.fetchall()
+
+    if rows:
+        print("\nall contacts:")
+        for row in rows:
+            print(row)
+    else:
+        print("\ntable is empty")
+
+    cur.close()
+    conn.close()
+
+
+setup_database_objects()
 
 while True:
-    print("\n--- PHONEBOOK MENU ---")
-    print("1 - Search by pattern")
-    print("2 - Insert or update user")
-    print("3 - Insert many users")
-    print("4 - Show paginated")
-    print("5 - Delete by name or phone")
-    print("0 - Exit")
+    print("\n---- phonebook with functions and procedures ----")
+    print("1 - search by pattern")
+    print("2 - insert or update one user")
+    print("3 - insert many users")
+    print("4 - show contacts with pagination")
+    print("5 - delete by username or phone")
+    print("6 - show all contacts")
+    print("0 - exit")
 
-    choice = input("Choose: ")
+    choice = input("choose: ").strip()
 
     if choice == "1":
-        search_pattern()
+        search_by_pattern()
     elif choice == "2":
-        insert_or_update()
+        insert_or_update_one()
     elif choice == "3":
         insert_many()
     elif choice == "4":
-        get_paginated()
+        show_paginated()
     elif choice == "5":
-        delete_by_value()
+        delete_by_name_or_phone()
+    elif choice == "6":
+        show_all_contacts()
     elif choice == "0":
+        print("goodbye")
         break
+    else:
+        print("invalid choice.")
