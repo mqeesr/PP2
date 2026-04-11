@@ -1,90 +1,79 @@
-import os
 import pygame
-
+import os
 
 class MusicPlayer:
     def __init__(self, music_folder):
-        pygame.mixer.init()
-
         self.music_folder = music_folder
-        self.playlist = self.load_playlist()
+
+        self.playlist = []
+        for file in os.listdir(music_folder):
+            if file.endswith(".mp3") or file.endswith(".wav"):
+                self.playlist.append(file)
+        self.playlist.sort()
+
         self.current_index = 0
-        self.status = "Stopped"
+        self.playing = False
         self.paused = False
 
-    def load_playlist(self):
-        tracks = []
+        if len(self.playlist) > 0:
+            pygame.mixer.music.load(os.path.join(self.music_folder, self.playlist[0]))
 
-        if not os.path.exists(self.music_folder):
-            return tracks
-
-        for file_name in os.listdir(self.music_folder):
-            if file_name.endswith(".mp3") or file_name.endswith(".wav"):
-                full_path = os.path.join(self.music_folder, file_name)
-                tracks.append(full_path)
-
-        tracks.sort()
-        return tracks
-
-    def play(self):
-        if not self.playlist:
-            self.status = "No tracks"
+    def play_pause(self):
+        if len(self.playlist) == 0:
             return
 
-        if self.paused:
+        if not self.playing:
+            pygame.mixer.music.play()
+            self.playing = True
+            self.paused = False
+        elif self.paused:
             pygame.mixer.music.unpause()
-            self.status = "Playing"
             self.paused = False
         else:
-            pygame.mixer.music.load(self.playlist[self.current_index])
-            pygame.mixer.music.play()
-            self.status = "Playing"
-            self.paused = False
-
-    def pause(self):
-        if self.status == "Playing":
             pygame.mixer.music.pause()
-            self.status = "Paused"
             self.paused = True
 
     def next_track(self):
-        if not self.playlist:
-            self.status = "No tracks"
+        if len(self.playlist) == 0:
             return
-
-        self.current_index += 1
-        if self.current_index >= len(self.playlist):
-            self.current_index = 0
-
+        self.current_index = (self.current_index + 1) % len(self.playlist)
+        pygame.mixer.music.load(os.path.join(self.music_folder, self.playlist[self.current_index]))
+        pygame.mixer.music.play()
+        self.playing = True
         self.paused = False
-        self.play()
 
     def previous_track(self):
-        if not self.playlist:
-            self.status = "No tracks"
+        if len(self.playlist) == 0:
             return
-
-        self.current_index -= 1
-        if self.current_index < 0:
-            self.current_index = len(self.playlist) - 1
-
+        self.current_index = (self.current_index - 1) % len(self.playlist)
+        pygame.mixer.music.load(os.path.join(self.music_folder, self.playlist[self.current_index]))
+        pygame.mixer.music.play()
+        self.playing = True
         self.paused = False
-        self.play()
+
+    def get_status(self):
+        if not self.playing:
+            return "Stopped"
+        elif self.paused:
+            return "Paused"
+        else:
+            return "Playing"
 
     def get_current_track_name(self):
-        if not self.playlist:
-            return "None"
-        return os.path.basename(self.playlist[self.current_index])
-
-    def get_position_seconds(self):
-        pos = pygame.mixer.music.get_pos()
-
-        if pos == -1:
-            return 0
-
-        return pos // 1000
+        if len(self.playlist) == 0:
+            return "No tracks"
+        return self.playlist[self.current_index]
 
     def update(self):
-        if self.status == "Playing" and not self.paused:
+        if self.playing and not self.paused:
             if not pygame.mixer.music.get_busy():
                 self.next_track()
+
+    def get_position(self):
+        pos_ms = pygame.mixer.music.get_pos()
+        if pos_ms == -1:
+            return "0:00"
+        seconds = pos_ms // 1000
+        minutes = seconds // 60
+        seconds = seconds % 60
+        return f"{minutes}:{seconds:02d}"
