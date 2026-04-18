@@ -27,7 +27,7 @@ while done:
         minuteINT = int(my_time.strftime("%M"))
         secondINT = int(my_time.strftime("%S"))
 
-        angleMINUTE = minuteINT * -6 - 25
+        angleMINUTE = minuteINT * -6 - 50
         angleSECOND = secondINT * -6
 
         minute = pygame.transform.rotate(minute_arrow, angleMINUTE)
