@@ -23,7 +23,7 @@ class Clock:
         minute = pygame.transform.rotate(self.minute_arrow, angleMINUTE)
         second = pygame.transform.rotate(self.second_arrow, angleSECOND)
 
-        screen.blit(self.face, (100, 100))
+        screen.blit(self.face, (100, 40))
 
-        screen.blit(second, (400 - second.get_width() // 2, 400 - second.get_height() // 2))
-        screen.blit(minute, (400 - minute.get_width() // 2, 400 - minute.get_height() // 2))
+        screen.blit(second, (400 - second.get_width() // 2, 340 - second.get_height() // 2))
+        screen.blit(minute, (400 - minute.get_width() // 2, 340 - minute.get_height() // 2))
