@@ -1,43 +1,29 @@
 import pygame
 import datetime
 
-pygame.init()
+class Clock:
+    def __init__(self):
+        self.face = pygame.image.load('images/mainclock.png')
+        self.face = pygame.transform.scale(self.face, (600, 600))
 
-screen = pygame.display.set_mode((800, 800))
-pygame.display.set_caption("mickey clock")
-clock = pygame.time.Clock()
-FPS = 1
-done = True
+        self.minute_arrow = pygame.image.load('images/rightarm.png')
+        self.minute_arrow = pygame.transform.scale(self.minute_arrow, (800, 700))
 
-myClock = pygame.image.load('images/mainclock.png')
-myClock = pygame.transform.scale(myClock, (600, 600))
+        self.second_arrow = pygame.image.load('images/leftarm.png')
+        self.second_arrow = pygame.transform.scale(self.second_arrow, (40, 500))
 
-minute_arrow = pygame.image.load('images/rightarm.png')
-minute_arrow = pygame.transform.scale(minute_arrow, (800, 700))
-second_arrow = pygame.image.load('images/leftarm.png')
-second_arrow = pygame.transform.scale(second_arrow, (40, 500))
-
-while done:
-        for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                        done = False
-
+    def draw(self, screen):
         my_time = datetime.datetime.now()
-        hourINT = int(my_time.strftime("%I"))
         minuteINT = int(my_time.strftime("%M"))
         secondINT = int(my_time.strftime("%S"))
 
-        angleMINUTE = minuteINT * -6 - 50
+        angleMINUTE = minuteINT * -6 - 25
         angleSECOND = secondINT * -6
 
-        minute = pygame.transform.rotate(minute_arrow, angleMINUTE)
-        second = pygame.transform.rotate(second_arrow, angleSECOND)
-        
-        
-        screen.fill((255, 255, 255))
-        screen.blit(myClock, (100, 100))
-        screen.blit(second, (400 - int(second.get_width() / 2), 400 - int(second.get_height() / 2))) 
-        screen.blit(minute, ((400 - int(minute.get_width() / 2), 400 - int(minute.get_height() / 2))))
-        pygame.display.flip()
-        clock.tick(60)
-pygame.quit()
+        minute = pygame.transform.rotate(self.minute_arrow, angleMINUTE)
+        second = pygame.transform.rotate(self.second_arrow, angleSECOND)
+
+        screen.blit(self.face, (100, 100))
+
+        screen.blit(second, (400 - second.get_width() // 2, 400 - second.get_height() // 2))
+        screen.blit(minute, (400 - minute.get_width() // 2, 400 - minute.get_height() // 2))
