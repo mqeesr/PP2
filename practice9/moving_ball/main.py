@@ -21,7 +21,7 @@ while done:
             if event.key == pygame.K_DOWN:
                 ball.move_down(500)
             if event.key == pygame.K_LEFT:
-                ball.move_left()
+                ball.move_left(800)
             if event.key == pygame.K_RIGHT:
                 ball.move_right(800)
 

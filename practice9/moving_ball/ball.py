@@ -18,15 +18,21 @@ class Ball:
         if self.y + self.radius > screen_height:
             self.y = screen_height - self.radius
 
-    def move_left(self):
+    def move_left(self, screen_width):
         self.x -= self.step
-        if self.x - self.radius < 0:
-            self.x = self.radius
+        # if self.x - self.radius < 0:
+        #     self.x = self.radius
+        if self.x + self.radius < 0:
+            self.x = screen_width + self.radius
+
 
     def move_right(self, screen_width):
         self.x += self.step
-        if self.x + self.radius > screen_width:
-            self.x = screen_width - self.radius
+        # if self.x + self.radius > screen_width:
+        #     self.x = screen_width - self.radius
+            
+        if self.x - self.radius > screen_width:
+            self.x = -self.radius
 
     def draw(self, screen):
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)

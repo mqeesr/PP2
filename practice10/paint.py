@@ -115,6 +115,10 @@ while running:
                     x2, y2 = current_pos
                     radius = int(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5)
                     pygame.draw.circle(screen, color, start_pos, radius, thickness)
+                elif tool == "ellipse":
+                    screen.blit(base_layer, (0, 0))
+                    x1, y1 = start_pos
+                    x2, y2 = current_pos
 
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:

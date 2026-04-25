@@ -27,14 +27,15 @@ background = pygame.image.load("штуки/AnimatedStreet.png")
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, h):
+        self.h = h
         super().__init__()
         self.image = pygame.image.load("штуки/Enemy.png")
         self.rect = self.image.get_rect()
-        self.reset_position()
+        self.reset_position(self.h)
 
-    def reset_position(self):
-        self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), -50)
+    def reset_position(self, h):
+        self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), h)
 
     def move(self):
         global SCORE
@@ -42,7 +43,7 @@ class Enemy(pygame.sprite.Sprite):
 
         if self.rect.top > SCREEN_HEIGHT:
             SCORE += 1
-            self.reset_position()
+            self.reset_position(-50)
 
 
 class Player(pygame.sprite.Sprite):
@@ -87,15 +88,18 @@ class Coin(pygame.sprite.Sprite):
 
 
 player = Player()
-enemy = Enemy()
+enemy = Enemy(-50)
+enemy2 = Enemy(-200)
 coin = Coin()
 
 enemies = pygame.sprite.Group()
 enemies.add(enemy)
+enemies.add(enemy2)
 
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 all_sprites.add(enemy)
+all_sprites.add(enemy2)
 
 INC_SPEED = pygame.USEREVENT + 1
 SPAWN_COIN = pygame.USEREVENT + 2
