@@ -101,7 +101,7 @@ INC_SPEED = pygame.USEREVENT + 1
 SPAWN_COIN = pygame.USEREVENT + 2
 
 pygame.time.set_timer(INC_SPEED, 1000)
-pygame.time.set_timer(SPAWN_COIN, 1800)
+pygame.time.set_timer(SPAWN_COIN, 1000)
 
 done = True
 
@@ -136,7 +136,6 @@ while done:
     if coin.active and pygame.sprite.collide_rect(player, coin):
         COINS_COLLECTED += 1
         coin.active = False
-        coin.rect.top = SCREEN_HEIGHT + 100
 
     if pygame.sprite.spritecollideany(player, enemies):
         screen.fill(RED)
