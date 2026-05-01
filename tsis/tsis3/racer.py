@@ -236,9 +236,7 @@ class Game:
             self.bonus_score += 40
 
     def crash(self, obj=None):
-        """obj — объект, с которым произошло столкновение"""
         if self.player.shield:
-            # Щит защищает ТОЛЬКО от машин и барьера
             if isinstance(obj, TrafficCar) or (isinstance(obj, Obstacle) and obj.kind == "barrier"):
                 self.player.shield = False
                 self.active_power = None
@@ -247,7 +245,6 @@ class Game:
                 self.player.rect.y += 40
                 return
 
-        # Если щит не сработал или это oil/pothole — применяем эффект
         if isinstance(obj, Obstacle):
             if obj.kind == "oil":
                 self.player.rect.x += random.choice([-25, 25])
@@ -257,7 +254,6 @@ class Game:
                 self.road_speed = max(3, self.road_speed - 2)
                 obj.kill()
                 return
-            # barrier уже обработан выше
 
         self.game_over = True
 
@@ -311,14 +307,12 @@ class Game:
         self.obstacles.update()
         self.powerups.update()
 
-        # Столкновения
         for coin in pygame.sprite.spritecollide(self.player, self.coins, True):
             self.coins_collected += coin.weight
 
         for power in pygame.sprite.spritecollide(self.player, self.powerups, True):
             self.activate_power(power.kind)
 
-        # Проверка столкновений
         hit_car = pygame.sprite.spritecollideany(self.player, self.traffic)
         if hit_car:
             self.crash(hit_car)

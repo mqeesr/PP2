@@ -153,7 +153,6 @@ def settings_screen(settings):
         clock.tick(FPS)
 
 
-# leaderboard_screen и game_over_screen без изменений
 def leaderboard_screen():
     back_btn = Button("Back", 150, 610, 200, 55)
 
