@@ -1,4 +1,3 @@
-# main.py
 import pygame
 from game import (
     screen, clock, font, small_font, big_font, WHITE, BLACK, RED,

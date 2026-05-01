@@ -97,7 +97,7 @@ def get_leaderboard():
 
     cur.execute("""
         SELECT p.username, gs.score, gs.level_reached,
-               TO_CHAR(gs.played_at, 'YY-MM-DD HH24:MI')
+        TO_CHAR(gs.played_at, 'YY-MM-DD HH24:MI')
         FROM game_sessions gs
         JOIN players p ON gs.player_id = p.id
         WHERE gs.score > 0
